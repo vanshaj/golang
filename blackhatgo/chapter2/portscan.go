@@ -27,8 +27,8 @@ func main() {
 			openPorts = append(openPorts, p)
 		}
 	}
-	//close(portS)
-	//close(results)
+	close(portS)
+	close(results)
 	sort.Ints(openPorts)
 	for _, port := range openPorts {
 		fmt.Printf("%d open\n", port)
