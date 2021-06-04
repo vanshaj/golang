@@ -3,13 +3,17 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"io"
 	"os"
 )
 
 func main() {
-	file, err := os.Open("Data/problem.csv")
+	var filePath *string
+	filePath = flag.String("file", "Data/problem.csv", "Quiz file path")
+	flag.Parse()
+	file, err := os.Open(*filePath)
 	if err != nil {
 		fmt.Println("unable to read file", err)
 		return
