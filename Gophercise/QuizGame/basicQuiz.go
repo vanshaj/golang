@@ -20,6 +20,7 @@ func main() {
 	}
 
 	counter := 0
+	scannerR := bufio.NewScanner(os.Stdin)
 	csvReader := csv.NewReader(file)
 	for {
 		record, err := csvReader.Read()
@@ -31,11 +32,10 @@ func main() {
 			fmt.Println("Unable to read single csv record ", err)
 			return
 		}
-		scanner := bufio.NewScanner(os.Stdin)
 
 		fmt.Printf("%s = ", record[0])
-		scanner.Scan()
-		answer := scanner.Text()
+		scannerR.Scan()
+		answer := scannerR.Text()
 
 		if answer == record[1] {
 			counter++
