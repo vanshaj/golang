@@ -23,7 +23,7 @@ func main() {
 		fmt.Println("Unable to send request ", err)
 		return
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body) // resp.Body is io.ReadCloser and ReadAll return []bytes
 	if err != nil {
 		fmt.Println("Unable to read body")
 		return
