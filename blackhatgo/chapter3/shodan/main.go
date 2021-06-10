@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"replay/blackhatgo/chapter3/shodan/shodan"
+
+	"github.com/blackhatgo/chapter3/shodan/shodan"
 )
 
 func main() {
