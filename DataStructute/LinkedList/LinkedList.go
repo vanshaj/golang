@@ -14,11 +14,20 @@ type LinkedList struct {
 	size int
 }
 
+/*
+ this can't be created without pointer receiver because if pointer receiver is not used the LinkedList will be duplicated and head of duplicated LinkedList will now point to the
+ new element and our actual linked list will never know about the element
+*/
 func (ll *LinkedList) prepend(n *node) {
 	n.next = ll.head
 	ll.head = n
 	ll.size++
 }
+
+/*
+this can be created without function pointer receiver (ll LinkedList) because element is appended at the end. Duplicated list struct head will point to the same element our actual head
+point to so iterating over them will result to the same list
+*/
 
 func (ll *LinkedList) apppend(n *node) {
 	node := ll.head
@@ -53,12 +62,14 @@ func (ll *LinkedList) addAtPosition(n *node, pos int) {
 	ll.size++
 }
 
+// same will not support (ll LinkedList)
 func (ll *LinkedList) DeleteAtStart() {
 	deleteNode := ll.head
 	ll.head = deleteNode.next
 	ll.size--
 }
 
+// will support (ll LinkedList)
 func (ll *LinkedList) DeleteAtEnd() {
 	node := ll.head
 	for {
@@ -73,19 +84,21 @@ func (ll *LinkedList) DeleteAtEnd() {
 	}
 }
 
-func (ll LinkedList) printList() {
+/*
+ can use both pointer receiver or normal
+*/
+func (ll *LinkedList) printList() {
 	node := ll.head
 	for node != nil {
 		fmt.Println(node.data)
 		node = node.next
-		ll.size--
 	}
 }
 
 func main() {
 	firstElem := node{1, nil}
 	head := &firstElem
-	ll := LinkedList{head, 1}
+	ll := &LinkedList{head, 1}
 	node1 := node{2, nil}
 	ll.prepend(&node1)
 	ll.prepend(&node{3, nil})
@@ -99,4 +112,5 @@ func main() {
 	fmt.Println("------------")
 	ll.DeleteAtEnd()
 	ll.printList()
+	fmt.Println("size of list is ", ll.size)
 }
