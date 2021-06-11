@@ -84,6 +84,30 @@ func (ll *LinkedList) DeleteAtEnd() {
 	}
 }
 
+func (ll *LinkedList) DeleteAtPos(pos int) {
+	node := ll.head
+	counter := 0
+	if pos > ll.size-1 {
+		fmt.Println("cant delete at position greater than size")
+	} else {
+		if pos == 0 {
+			ll.head = node.next
+		} else {
+			for pos-1 != counter {
+				node = node.next
+				counter++
+			}
+			node.next = node.next.next
+		}
+		ll.size--
+	}
+}
+
+func (ll *LinkedList) emptyList() {
+	ll.head = &node{}
+	ll.size = 0
+}
+
 /*
  can use both pointer receiver or normal
 */
@@ -110,7 +134,7 @@ func main() {
 	ll.DeleteAtStart()
 	ll.printList()
 	fmt.Println("------------")
-	ll.DeleteAtEnd()
+	ll.emptyList()
 	ll.printList()
 	fmt.Println("size of list is ", ll.size)
 }
