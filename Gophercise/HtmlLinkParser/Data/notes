@@ -1,0 +1,14 @@
+link package
+Create a link struct containing href and text
+create a reader of html document 
+then what we can call just link.Parse(reader) it will return all the links i.e slice of link
+
+
+In main 
+use link.Parse
+
+DFS the html in package link
+1. parse the html document
+2. 
+
+
