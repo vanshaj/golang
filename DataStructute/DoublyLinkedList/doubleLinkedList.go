@@ -36,6 +36,23 @@ func (dl *doubleLinkedList) insertAtEnd(data int) {
 	}
 }
 
+func (dl *doubleLinkedList) insertAtPos(data int, pos int) {
+	if pos == 0 {
+		dl.head = &node{data, nil, dl.head}
+	} else {
+		count := 0
+		pointer := dl.head
+		for count < pos-1 {
+			pointer = pointer.next
+			count++
+		}
+		insertedNode := &node{data, pointer, pointer.next}
+		pointer.next.prev = insertedNode
+		pointer.next = insertedNode
+
+	}
+}
+
 func (dl *doubleLinkedList) printData() {
 	nod := dl.head
 	for nod != nil {
@@ -56,4 +73,8 @@ func main() {
 	dl.insertAtBeg(5)
 	dl.printData()
 
+	fmt.Println("----------------------")
+	dl.insertAtPos(6, 3)
+	dl.insertAtPos(7, 0)
+	dl.printData()
 }
