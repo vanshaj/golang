@@ -53,6 +53,37 @@ func (dl *doubleLinkedList) insertAtPos(data int, pos int) {
 	}
 }
 
+func (dl *doubleLinkedList) deleteAtStart() {
+	n := dl.head
+	dl.head = n.next
+	n.next.prev = nil
+	n.next = nil
+}
+
+func (dl *doubleLinkedList) deleteAtEnd() {
+	nod := dl.head
+	for nod.next.next != nil {
+		nod = nod.next
+	}
+	nod.next.prev = nil
+	nod.next = nil
+}
+
+func (dl *doubleLinkedList) deleteAtPos(pos int) {
+	if pos == 0 {
+		dl.deleteAtStart()
+	} else {
+		counter := 0
+		node := dl.head
+		for counter != pos-1 {
+			node = node.next
+			counter++
+		}
+		node.next = node.next.next
+		node.next.prev = node
+	}
+}
+
 func (dl *doubleLinkedList) printData() {
 	nod := dl.head
 	for nod != nil {
@@ -76,5 +107,21 @@ func main() {
 	fmt.Println("----------------------")
 	dl.insertAtPos(6, 3)
 	dl.insertAtPos(7, 0)
+	dl.insertAtPos(8, 2)
+	dl.printData()
+
+	fmt.Println("-------------------delete at pos----------")
+	dl.deleteAtPos(3)
+	dl.deleteAtPos(5)
+	dl.printData()
+
+	fmt.Println("-------------------delete at start========")
+	dl.deleteAtStart()
+	dl.deleteAtStart()
+	dl.printData()
+
+	fmt.Println("--------delete at end-------------")
+	dl.deleteAtEnd()
+	dl.deleteAtEnd()
 	dl.printData()
 }
