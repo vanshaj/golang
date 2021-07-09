@@ -42,6 +42,54 @@ func (cl *circularLinkedList) addAtEnd(data int) {
 	}
 }
 
+func (cl *circularLinkedList) addAtPost(pos int, data int) {
+	if pos == 0 {
+		n := node{data, nil}
+		cl.head = &n
+		n.next = &n
+	} else {
+		startNode := cl.head
+		n := node{data, nil}
+		counter := 0
+		for counter != pos-1 {
+			startNode = startNode.next
+			counter++
+		}
+		n.next = startNode.next
+		startNode.next = &n
+
+	}
+}
+
+func (cl *circularLinkedList) deleteAtEnd(){
+	ptr := cl.head
+	if(ptr.next == cl.head){
+		cl.head = nil
+	}else{
+		for ptr.next.next != cl.head{
+			ptr = ptr.next
+		}
+		ptr.next.next = nil
+		ptr.next = cl.head
+	}
+
+}
+
+func (cl *circularLinkedList) deleteAtStart(){
+	ptr := cl.head
+	if(ptr.next == cl.head){
+		cl.head = nil
+	}else{
+		for ptr.next != cl.head{
+			ptr = ptr.next
+		}
+		start := cl.head
+		cl.head = start.next
+		start.next = nil
+		ptr.next = cl.head
+	}
+}
+
 func (cl *circularLinkedList) printList() {
 	first := cl.head
 	if first != nil {
@@ -64,4 +112,17 @@ func main() {
 	cl.addAtEnd(2)
 	cl.addAtEnd(1)
 	cl.printList()
+	fmt.Println("----------------------")
+	cl.addAtPost(2, 2)
+	cl.addAtPost(3, 3)
+	cl.printList()
+	fmt.Println("----------------------")
+	cl.deleteAtEnd()
+	cl.deleteAtEnd()
+	cl.printList()
+	fmt.Println("----------------------")
+	cl.deleteAtStart()
+	cl.deleteAtStart()
+	cl.printList()
+
 }
