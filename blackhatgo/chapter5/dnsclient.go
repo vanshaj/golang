@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sync"
 	"text/tabwriter"
 
 	"github.com/miekg/dns"
@@ -15,13 +16,17 @@ type result struct {
 	HostName  string
 }
 
+var wg sync.WaitGroup
+
+///////////////////////////////////// FAN OUT CONCURRENCY PATTERN /////////////////////////////////////////
+
 func main() {
 	var flWorkerCount *int //flag.Int("c", 2, "workers to be user")
 	var flWordlist *string //flag.String("w", "", "wordlist to be user")
 	var flDomain *string
 
 	domain := "microsoft.com"
-	workerCount := 2
+	workerCount := 5
 	wordlist := "wordlist"
 
 	flWorkerCount = &workerCount
@@ -44,23 +49,28 @@ func main() {
 
 	scanner := bufio.NewScanner(fh)
 
-	for i := 0; i < *flWorkerCount; i++ {
-		go worker(gather, fqdns, dnsServerAddr)
-	}
-
-	for scanner.Scan() {
-		val := scanner.Text()
-		fqdns <- fmt.Sprintf("%s.%s", val, *flDomain)
-	}
-
+	// purpose of this go routine 
+	// Launche the separte go routines i.e Workercount and do the job with each go routine
 	go func() {
-		for r := range gather {
-			results = append(results, r...)
+		wg.Add(*flWorkerCount) //To sync the number of go routines created 
+		for i := 0; i < *flWorkerCount; i++ {
+			go worker(gather, fqdns, dnsServerAddr) // launch the cpu intensive work n time n is number of threads
 		}
+		wg.Wait() // will wait for all go routines to complete their work which will be done at line 91
+		close(gather) // will close the output channel
 	}()
 
-	close(fqdns)
-	close(gather)
+	go func() {
+		for scanner.Scan() {
+			val := scanner.Text()
+			fqdns <- fmt.Sprintf("%s.%s", val, *flDomain) // will write continuously on the input channel
+		}
+		close(fqdns) //once the writing is complete close the channel
+	}()
+
+	for r := range gather { // loop over the output channel and store the result
+		results = append(results, r...)
+	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 4, ' ', 0)
 	for _, r := range results {
@@ -71,13 +81,14 @@ func main() {
 }
 
 func worker(gather chan []result, fqdns chan string, dnsServerAddr string) {
-	for eachDnsReq := range fqdns {
-		results := lookup(eachDnsReq, dnsServerAddr)
+
+	for eachDnsReq := range fqdns { // continuosly reading from input channel which is being written at line 66
+		results := lookup(eachDnsReq, dnsServerAddr) //my actual work
 		if len(results) > 0 {
-			gather <- results
+			gather <- results // continously writing to the output channel which is being read at line 71 by ranging over
 		}
 	}
-
+	wg.Done() // once the input channel is close then close this go routine and will be called for each go routine working on this method
 }
 
 func lookup(fqdn string, dnsServerAddr string) []result {
