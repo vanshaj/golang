@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"strings"
 
@@ -46,17 +47,27 @@ func dnsRequestHandler(w dns.ResponseWriter, req *dns.Msg) {
 		name = strings.Join(parts[len(parts)-2:], ".")
 	}
 	match, ok := records[name]
-	fmt.Println(match)
+	name = fmt.Sprintf("%v.", name)
 	if !ok {
 		dns.HandleFailed(w, req)
 		return
 	}
-	resp
-	if err != nil {
-		dns.HandleFailed(w, req)
-		return
-	}
-	if err := w.WriteMsg(resp); err != nil {
+	msg.Authoritative = true
+	msg.Answer = append(msg.Answer, &dns.A{
+		Hdr: dns.RR_Header{
+			Name:   name,
+			Rrtype: dns.TypeA,
+			Class:  dns.ClassINET,
+			Ttl:    60,
+		},
+		A: net.ParseIP(match),
+	})
+	// if err != nil {
+	// 	dns.HandleFailed(w, req)
+	// 	return
+	// }
+	if err := w.WriteMsg(&msg); err != nil {
+		fmt.Println("Handle failed because of ", err)
 		dns.HandleFailed(w, req)
 		return
 	}
@@ -64,7 +75,6 @@ func dnsRequestHandler(w dns.ResponseWriter, req *dns.Msg) {
 
 func main() {
 	records, _ = parse("proxy.config")
-
 	dns.HandleFunc(".", dnsRequestHandler)
 	log.Fatal(dns.ListenAndServe(":53", "udp", nil))
 }

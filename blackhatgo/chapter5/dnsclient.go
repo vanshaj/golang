@@ -25,7 +25,7 @@ func main() {
 	var flWordlist *string //flag.String("w", "", "wordlist to be user")
 	var flDomain *string
 
-	domain := "microsoft.com"
+	domain := "microsoft.com." // . at the end is mandatory because fully qualified domain name
 	workerCount := 5
 	wordlist := "wordlist"
 
@@ -49,14 +49,14 @@ func main() {
 
 	scanner := bufio.NewScanner(fh)
 
-	// purpose of this go routine 
+	// purpose of this go routine
 	// Launche the separte go routines i.e Workercount and do the job with each go routine
 	go func() {
-		wg.Add(*flWorkerCount) //To sync the number of go routines created 
+		wg.Add(*flWorkerCount) //To sync the number of go routines created
 		for i := 0; i < *flWorkerCount; i++ {
 			go worker(gather, fqdns, dnsServerAddr) // launch the cpu intensive work n time n is number of threads
 		}
-		wg.Wait() // will wait for all go routines to complete their work which will be done at line 91
+		wg.Wait()     // will wait for all go routines to complete their work which will be done at line 91
 		close(gather) // will close the output channel
 	}()
 
