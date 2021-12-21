@@ -6,12 +6,16 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	"strings"
+	"sync"
+	"syscall"
 
 	"github.com/miekg/dns"
 )
 
 var records map[string]string
+var recordLock sync.RWMutex
 
 func parse(filename string) (map[string]string, error) {
 	records := make(map[string]string)
@@ -46,7 +50,9 @@ func dnsRequestHandler(w dns.ResponseWriter, req *dns.Msg) {
 	if len(parts) > 1 {
 		name = strings.Join(parts[len(parts)-2:], ".")
 	}
+	recordLock.RLock()
 	match, ok := records[name]
+	recordLock.RUnlock()
 	name = fmt.Sprintf("%v.", name)
 	if !ok {
 		dns.HandleFailed(w, req)
@@ -76,5 +82,18 @@ func dnsRequestHandler(w dns.ResponseWriter, req *dns.Msg) {
 func main() {
 	records, _ = parse("proxy.config")
 	dns.HandleFunc(".", dnsRequestHandler)
+	go func() {
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, syscall.Signal(0xa))
+		for sig := range sigs {
+			switch sig {
+			case syscall.Signal(0xa):
+				log.Println("SIGUSR1: reloading records")
+				recordLock.Lock()
+				parse("proxy.config")
+				recordLock.Unlock()
+			}
+		}
+	}()
 	log.Fatal(dns.ListenAndServe(":53", "udp", nil))
 }
